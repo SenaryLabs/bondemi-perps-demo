@@ -91,7 +91,15 @@ interface PriceChartProps {
 
 export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: PriceChartProps) {
     const { theme } = useTheme();
-    const colors = THEME_COLORS[theme] || THEME_COLORS.midnight;
+    
+    // Resolve 'system' theme to actual theme based on system preference
+    const resolvedTheme = theme === 'system' 
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'midnight' : 'arctic')
+        : theme === 'capital'
+        ? 'midnight' // Fallback for 'capital' theme
+        : theme;
+    
+    const colors = THEME_COLORS[resolvedTheme as keyof typeof THEME_COLORS] || THEME_COLORS.midnight;
 
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
