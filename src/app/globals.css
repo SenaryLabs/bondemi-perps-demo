@@ -1,0 +1,319 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* Institutional Blue Theme - Professional DeFi */
+/* Slightly tighter radius (6px) */
+
+
+/* Theme: Midnight (Default / Professional Dark) */
+[data-theme='midnight'] {
+  --background: #020617;
+  /* Slate 950 - Deep, professional dark */
+  --foreground: #f8fafc;
+  /* Slate 50 */
+  --card: #0f172a80;
+  /* Slate 900 with opacity */
+  --card-foreground: #f8fafc;
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+  --primary: #6366f1;
+  /* Indigo 500 - Professional Accent */
+  --primary-foreground: #FFFFFF;
+  --muted: #1e293b;
+  /* Slate 800 */
+  --muted-foreground: #94a3b8;
+  /* Slate 400 */
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #6366f1;
+  /* Trade Colors - Matching Theme Primary */
+  --emerald-500: #6366f1;
+  /* Indigo for Long */
+  --rose-500: #f43f5e;
+}
+
+/* Theme: Obsidian (High Contrast / OLED) */
+[data-theme='obsidian'] {
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --card: #121212;
+  --card-foreground: #FFFFFF;
+  --popover: #121212;
+  --popover-foreground: #FFFFFF;
+  --primary: #FFFFFF;
+  /* Mono Primary */
+  --primary-foreground: #000000;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #FFFFFF;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #FFFFFF;
+  /* Specific override for trade colors to retain semantic meaning but sharper */
+  --emerald-500: #10b981;
+  --rose-500: #e11d48;
+}
+
+/* Theme: Terminal (Bloomberg/Retro) */
+[data-theme='terminal'] {
+  --background: #1e1e1e;
+  /* Classic Terminal Dark Gray or use #000000 */
+  --foreground: #fb923c;
+  /* Orange-400 */
+  --card: #2d2d2d;
+  --card-foreground: #fb923c;
+  --popover: #2d2d2d;
+  --popover-foreground: #fb923c;
+  --primary: #f97316;
+  /* Orange-500 */
+  --primary-foreground: #1e1e1e;
+  --muted: #444444;
+  --muted-foreground: #a8a29e;
+  /* Warm Gray */
+  --accent: #f97316;
+  --accent-foreground: #1e1e1e;
+  --border: #444444;
+  --input: #2d2d2d;
+  --ring: #f97316;
+  /* Retro Trade Colors */
+  --emerald-500: #4ade80;
+  /* Green-400 */
+  --rose-500: #ef4444;
+  /* Red-500 */
+}
+
+/* Theme: Mindful (Custom Palette 233) */
+[data-theme='mindful'] {
+  --background: #112244;
+  /* Dark Eclipse */
+  --foreground: #F4F0EC;
+  /* Isabelline */
+
+  --card: #24547D80;
+  /* Blueberry Twist (50% Opacity) */
+  --card-foreground: #F4F0EC;
+
+  --popover: #112244;
+  --popover-foreground: #F4F0EC;
+
+  --primary: #DFC6AA;
+  /* Larb Gai */
+  --primary-foreground: #112244;
+
+  --muted: #24547D;
+  /* Blueberry Twist */
+  --muted-foreground: #9EB0AA;
+  /* Grey Morning */
+
+  --accent: #C1967C;
+  /* Maple Sugar */
+  --accent-foreground: #FFFFFF;
+
+  --border: #24547D;
+  /* Blueberry Twist */
+  --input: #24547D;
+  --ring: #DFC6AA;
+
+  /* Soft Trade Colors based on palette */
+  --emerald-500: #9EB0AA;
+  /* Grey Morning (acting as Green) */
+  --rose-500: #C1967C;
+  /* Maple Sugar (acting as Red) */
+}
+
+/* Theme: Neon Lime (Palette 231) */
+[data-theme='lime'] {
+  --background: #0F1519;
+  /* Black is Back */
+  --foreground: #F7F5EC;
+  /* Icy Tundra */
+
+  --card: #1C3B4280;
+  /* Royal Neptune (50% Opacity) */
+  --card-foreground: #F7F5EC;
+
+  --popover: #0F1519;
+  --popover-foreground: #F7F5EC;
+
+  --primary: #B8E100;
+  /* Livid Lime */
+  --primary-foreground: #0F1519;
+
+  --muted: #1C3B42;
+  /* Royal Neptune */
+  --muted-foreground: #B2A69A;
+  /* Deer Run */
+
+  --accent: #B8E100;
+  /* Livid Lime */
+  --accent-foreground: #0F1519;
+
+  --border: #1C3B42;
+  /* Royal Neptune */
+  --input: #1C3B42;
+  --ring: #B8E100;
+
+  /* Vibrant Chart Colors */
+  --emerald-500: #B8E100;
+  /* Livid Lime for Up/Long */
+  --rose-500: #B2A69A;
+  /* Deer Run for Down/Short (Neutral/Contrast) */
+}
+
+/* Theme: Sunset (Palette 229) */
+[data-theme='sunset'] {
+  --background: #331233;
+  /* Cultist Robe */
+  --foreground: #E8D9CE;
+  /* Malted Milk */
+
+  --card: #69274680;
+  /* Witch Soup (50% Opacity) */
+  --card-foreground: #F6F4F5;
+  /* Cultured */
+
+  --popover: #331233;
+  --popover-foreground: #E8D9CE;
+
+  --primary: #FBCA69;
+  /* Sunspark */
+  --primary-foreground: #331233;
+
+  --muted: #692746;
+  /* Witch Soup */
+  --muted-foreground: #E45E32;
+  /* Red Clay (Warm Muted) */
+
+  --accent: #E45E32;
+  /* Red Clay */
+  --accent-foreground: #F6F4F5;
+
+  --border: #692746;
+  /* Witch Soup */
+  --input: #692746;
+  --ring: #FBCA69;
+
+  /* Warm Chart Colors */
+  --emerald-500: #FBCA69;
+  /* Sunspark for Up */
+  --rose-500: #E45E32;
+  /* Red Clay for Down */
+}
+
+/* Theme: Arctic (Professional Light) */
+[data-theme='arctic'] {
+  --background: #ffffff;
+  /* Pure White */
+  --foreground: #0f172a;
+  /* Slate 900 */
+  --card: #f8fafc;
+  /* Slate 50 */
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #0f172a;
+  /* Slate 900 - High Contrast Primary */
+  --primary-foreground: #ffffff;
+  --muted: #e2e8f0;
+  /* Slate 200 - Darker muted for contrast */
+  --muted-foreground: #475569;
+  /* Slate 600 - Darker grey text */
+  --accent: #e2e8f0;
+  --accent-foreground: #0f172a;
+  --border: #cbd5e1;
+  /* Slate 300 - Sharper border */
+  --input: #e2e8f0;
+  --ring: #0f172a;
+  /* Crisp Chart Colors */
+  --emerald-500: #0f172a;
+  /* Slate 900 for Long */
+  --rose-500: #ef4444;
+}
+
+/* Theme: Capital (Requested Palette) */
+[data-theme='capital'] {
+  --background: #101010;
+  /* Near Black */
+  --foreground: #e5e5e5;
+  /* Light Grey */
+
+  --card: #1a1a1a;
+  /* Dark Grey Panel */
+  --card-foreground: #e5e5e5;
+
+  --popover: #1a1a1a;
+  --popover-foreground: #e5e5e5;
+
+  --primary: #d4af37;
+  /* Metalllic Gold */
+  --primary-foreground: #101010;
+
+  --muted: #2d2d2d;
+  --muted-foreground: #a3a3a3;
+
+  --accent: #d4af37;
+  --accent-foreground: #101010;
+
+  --border: #2d2d2d;
+  --input: #2d2d2d;
+  --ring: #d4af37;
+
+  /* Trading Colors - Thematic */
+  --emerald-500: #d4af37;
+  /* Gold for Long */
+  --rose-500: #ef4444;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Custom Scrollbar - Slate tone */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
