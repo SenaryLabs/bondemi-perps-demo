@@ -13,9 +13,9 @@ import { useOrders } from '@/hooks/use-orders';
 import { getOrganicStats, fmtCompact } from '@/lib/market-stats';
 
 export default function TradePage() { 
-    const [selectedSymbol, setSelectedSymbol] = useState('US10Y');
+    const [selectedSymbol, setSelectedSymbol] = useState('XAU');
     
-    const asset = MARKET_CONFIG[selectedSymbol] || MARKET_CONFIG['US10Y'];
+    const asset = MARKET_CONFIG[selectedSymbol] || MARKET_CONFIG['XAU'];
 
     // Market Data Hook using simulated mock feed
     const { prices } = useMarketData([selectedSymbol]);
@@ -33,8 +33,8 @@ export default function TradePage() {
     return (
         <main className="flex flex-col h-full w-full bg-background text-foreground overflow-hidden">
             <div className="flex-1 flex overflow-hidden min-h-0 relative">
-                {/* Left: Market Selector (Fixed Width) */}
-                <div className="hidden md:block w-[260px] border-r border-border/30 bg-card/20 backdrop-blur-sm h-full overflow-y-auto flex-shrink-0">
+                {/* Left: Market Selector (Fixed Width - Wider) */}
+                <div className="hidden md:block w-[300px] border-r border-border/30 bg-card/20 backdrop-blur-sm h-full overflow-y-auto flex-shrink-0">
                     <MarketSelector
                         selected={selectedSymbol}
                         onSelect={setSelectedSymbol}

@@ -20,12 +20,13 @@ export function MarketSelector({
     // Spec says: "Tab: RATES (Assets: US10Y, US3M, HYG)"
     // Spec says: "Tab: CRYPTO (Assets: BTC, ETH, SOL)"
     // Let's implement dynamic tabs based on types present in MARKET_CONFIG.
-    const [tab, setTab] = useState<'RATES' | 'CRYPTO' | 'COMMODITIES' | 'STOCKS'>('RATES');
+    // Default to COMMODITIES since XAU (Gold) is the default symbol
+    const [tab, setTab] = useState<'RATES' | 'CRYPTO' | 'COMMODITIES' | 'STOCKS'>('COMMODITIES');
     const [search, setSearch] = useState('');
 
     const allSymbols = Object.keys(MARKET_CONFIG);
-    // Only fetch BTC price to avoid rate limiting - other symbols use static initial prices
-    const { prices, isLoading } = useMarketData(['BTC']);
+    // Only fetch the selected ticker price to avoid rate limiting - other symbols use static initial prices
+    const { prices, isLoading } = useMarketData([selected]);
     
     // Filter Logic
     const filteredMarkets = useMemo(() => {
@@ -44,82 +45,82 @@ export function MarketSelector({
 
     return (
         <div className="flex flex-col h-full bg-card/30 backdrop-blur-sm">
-            {/* Header */}
-            <div className="p-4 border-b border-border space-y-3">
+            {/* Header - More Compact */}
+            <div className="p-3 border-b border-border space-y-2">
                  <div className="flex items-center gap-2 text-foreground font-bold px-1">
-                    <LineChart className="w-4 h-4 text-primary" />
-                    <span className="tracking-tight text-sm">Markets</span>
+                    <LineChart className="w-3.5 h-3.5 text-primary" />
+                    <span className="tracking-tight text-xs">Markets</span>
                  </div>
                  
-                 {/* Search */}
+                 {/* Search - More Compact */}
                  <div className="relative group">
-                    <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <Search className="absolute left-2.5 top-2 h-3 w-3 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <input 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search markets..." 
-                        className="w-full h-9 pl-9 pr-3 bg-muted/20 border border-border/50 rounded-lg text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 placeholder:text-muted-foreground hover:bg-muted/30 transition-all font-medium"
+                        placeholder="Search..." 
+                        className="w-full h-8 pl-8 pr-2 bg-muted/20 border border-border/50 rounded-md text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 placeholder:text-muted-foreground hover:bg-muted/30 transition-all font-medium"
                     />
                  </div>
 
-                 {/* Tabs (RATES | CRYPTO | COMMODITIES | STOCKS) */}
-                 <div className="flex w-full gap-1 p-0.5 bg-muted/10 rounded-lg overflow-x-auto no-scrollbar">
+                 {/* Tabs (RATES | CRYPTO | COMMODITIES | STOCKS) - More Compact */}
+                 <div className="flex w-full gap-0.5 p-0.5 bg-muted/10 rounded-md overflow-x-auto no-scrollbar">
                      <button
                         onClick={() => setTab('RATES')}
                         className={cn(
-                            "flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold py-1.5 rounded transition-all uppercase tracking-wider min-w-[60px]",
+                            "flex-1 flex items-center justify-center gap-1 text-[9px] font-bold py-1 rounded transition-all uppercase tracking-wider min-w-[50px]",
                             tab === 'RATES' 
                                 ? "bg-primary/10 text-primary shadow-sm" 
                                 : "text-muted-foreground hover:bg-muted/20 hover:text-foreground"
                         )}
                      >
-                         <Flame size={12} />
+                         <Flame size={10} />
                          Rates
                      </button>
                      <button
                         onClick={() => setTab('CRYPTO')}
                         className={cn(
-                            "flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold py-1.5 rounded transition-all uppercase tracking-wider min-w-[60px]",
+                            "flex-1 flex items-center justify-center gap-1 text-[9px] font-bold py-1 rounded transition-all uppercase tracking-wider min-w-[50px]",
                             tab === 'CRYPTO' 
                                 ? "bg-primary/10 text-primary shadow-sm" 
                                 : "text-muted-foreground hover:bg-muted/20 hover:text-foreground"
                         )}
                      >
-                         <Zap size={12} />
+                         <Zap size={10} />
                          Crypto
                      </button>
                      <button
                         onClick={() => setTab('COMMODITIES')}
                         className={cn(
-                            "flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold py-1.5 rounded transition-all uppercase tracking-wider min-w-[60px]",
+                            "flex-1 flex items-center justify-center gap-1 text-[9px] font-bold py-1 rounded transition-all uppercase tracking-wider min-w-[50px]",
                             tab === 'COMMODITIES' 
                                 ? "bg-primary/10 text-primary shadow-sm" 
                                 : "text-muted-foreground hover:bg-muted/20 hover:text-foreground"
                         )}
                      >
-                         <Box size={12} />
+                         <Box size={10} />
                          Comm.
                      </button>
                      <button
                         onClick={() => setTab('STOCKS')}
                         className={cn(
-                            "flex-1 flex items-center justify-center gap-1.5 text-[10px] font-bold py-1.5 rounded transition-all uppercase tracking-wider min-w-[60px]",
+                            "flex-1 flex items-center justify-center gap-1 text-[9px] font-bold py-1 rounded transition-all uppercase tracking-wider min-w-[50px]",
                             tab === 'STOCKS' 
                                 ? "bg-primary/10 text-primary shadow-sm" 
                                 : "text-muted-foreground hover:bg-muted/20 hover:text-foreground"
                         )}
                      >
-                         <Building2 size={12} />
+                         <Building2 size={10} />
                          Stocks
                      </button>
                  </div>
             </div>
 
-            {/* Column Headers */}
-            <div className="px-4 py-2 flex text-[10px] font-bold text-muted-foreground border-b border-border bg-muted/5 uppercase tracking-wider">
+            {/* Column Headers - More Compact */}
+            <div className="px-3 py-1.5 flex text-[9px] font-bold text-muted-foreground border-b border-border bg-muted/5 uppercase tracking-wider">
                 <span className="flex-1">Asset</span>
-                <span className="w-20 text-right">{tab === 'RATES' ? 'Yield/Px' : 'Price'}</span>
-                <span className="w-16 text-right">24h</span>
+                <span className="w-24 text-right">{tab === 'RATES' ? 'Yield/Px' : 'Price'}</span>
+                <span className="w-20 text-right">24h</span>
             </div>
 
             {/* List */}
@@ -145,19 +146,19 @@ export function MarketSelector({
                                 key={m.id}
                                 onClick={() => onSelect(m.id)}
                                 className={cn(
-                                    "flex items-center w-full px-4 py-3 border-b border-border/20 hover:bg-muted/10 transition-colors group text-left relative",
+                                    "flex items-center w-full px-3 py-2 border-b border-border/20 hover:bg-muted/10 transition-colors group text-left relative",
                                     active && "bg-primary/5 hover:bg-primary/10"
                                 )}
                             >
                                 {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(99,102,241,0.5)]" />}
                                 
-                                {/* Status Dot + Symbol */}
-                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                {/* Status Dot + Symbol - More Compact */}
+                                <div className="flex items-center gap-2.5 flex-1 min-w-0">
                                     <div className="relative">
-                                        <TickerIcon symbol={m.id} size={28} />
+                                        <TickerIcon symbol={m.id} size={24} />
                                         {/* Status Indicator Dot */}
                                         <div className={cn(
-                                            "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background",
+                                            "absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border-2 border-background",
                                             isClosed ? "bg-muted-foreground/50" : "bg-emerald-500 shadow-[0_0_6px_#10b981]"
                                         )} />
                                     </div>
@@ -166,14 +167,14 @@ export function MarketSelector({
                                         <span className={cn("text-xs font-bold font-mono transition-colors", active ? "text-primary" : "text-foreground")}>
                                             {m.id}
                                         </span>
-                                        <span className="text-[10px] text-muted-foreground truncate opacity-70 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-[9px] text-muted-foreground truncate opacity-70 group-hover:opacity-100 transition-opacity">
                                             {m.name}
                                         </span>
                                     </div>
                                 </div>
                                 
                                 {/* Price */}
-                                <div className="w-20 text-right font-mono text-xs text-foreground/90 font-medium">
+                                <div className="w-24 text-right font-mono text-xs text-foreground/90 font-medium">
                                     {price > 0 
                                         ? (m.type === 'rates' 
                                             ? price.toFixed(2) // No * 10, standard 2 decimals for yield
@@ -185,13 +186,13 @@ export function MarketSelector({
                                           )
                                         : '---'
                                     }
-                                    {m.type === 'rates' && <span className="text-[9px] text-muted-foreground ml-0.5">%</span>}
-                                    {['ZC', 'ZW'].includes(m.id) && <span className="text-[9px] text-muted-foreground/70 ml-1">(cents)</span>}
+                                    {m.type === 'rates' && <span className="text-[8px] text-muted-foreground ml-0.5">%</span>}
+                                    {['ZC', 'ZW'].includes(m.id) && <span className="text-[8px] text-muted-foreground/70 ml-1">(c)</span>}
                                 </div>
                                 
                                 {/* Change */}
                                 <div className={cn(
-                                    "w-16 text-right font-mono text-[11px] font-bold",
+                                    "w-20 text-right font-mono text-[10px] font-bold",
                                     isPos ? "text-[var(--emerald-500)]" : "text-[var(--rose-500)]"
                                 )}>
                                     {isPos ? '+' : ''}{change.toFixed(2)}%

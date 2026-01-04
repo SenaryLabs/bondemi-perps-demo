@@ -18,6 +18,7 @@ export function useMarketData(symbols: string[] = []) {
         'BTC':   { symbol: 'BTC',   price: 92450,   change24h: 3.2 },
         'ETH':   { symbol: 'ETH',   price: 3850,      change24h: 1.5 },
         'SOL':   { symbol: 'SOL',   price: 245,        change24h: 4.8 },
+        'XAU':   { symbol: 'XAU',   price: 2650.50,    change24h: 0.85 },
         'NVDA':  { symbol: 'NVDA',  price: 135.50,     change24h: 2.1 },
         'TSLA':  { symbol: 'TSLA',  price: 345.20,     change24h: -1.2 },
     };
