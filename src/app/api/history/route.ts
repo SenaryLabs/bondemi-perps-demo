@@ -4,51 +4,6 @@ import { SYMBOL_MAP } from '@/lib/market-config';
 
 export const dynamic = 'force-dynamic'; // Ensure no caching for realtime
 
-// Generate mock data as fallback when API is rate limited
-function generateMockData(symbol: string, interval: string, days: number): Array<{ time: number; open: number; high: number; low: number; close: number; volume: number }> {
-    const now = Math.floor(Date.now() / 1000);
-    const intervalSeconds = interval === '15m' ? 900 : interval === '60m' || interval === '1h' ? 3600 : interval === '1d' ? 86400 : 900;
-    const dataPoints = Math.floor((days * 24 * 60 * 60) / intervalSeconds);
-    
-    // Base price - use a reasonable default based on symbol
-    let basePrice = 100;
-    if (symbol.includes('BTC')) basePrice = 92000;
-    else if (symbol.includes('ETH')) basePrice = 3800;
-    else if (symbol.includes('SOL')) basePrice = 240;
-    else if (symbol.includes('US10Y') || symbol.includes('^TNX')) basePrice = 4.25;
-    else if (symbol.includes('US02Y') || symbol.includes('^IRX')) basePrice = 4.15;
-    
-    const candles = [];
-    let currentPrice = basePrice;
-    
-    for (let i = dataPoints - 1; i >= 0; i--) {
-        const time = now - (i * intervalSeconds);
-        // Random walk with slight upward bias
-        const change = (Math.random() - 0.45) * 0.02; // -0.45 to 0.55, so slight upward bias
-        currentPrice = currentPrice * (1 + change);
-        
-        const volatility = currentPrice * 0.01; // 1% volatility
-        const open = currentPrice;
-        const close = open * (1 + (Math.random() - 0.5) * 0.01);
-        const high = Math.max(open, close) + Math.random() * volatility;
-        const low = Math.min(open, close) - Math.random() * volatility;
-        const volume = Math.floor(Math.random() * 1000000 + 100000);
-        
-        candles.push({
-            time,
-            open: Math.round(open * 100) / 100,
-            high: Math.round(high * 100) / 100,
-            low: Math.round(low * 100) / 100,
-            close: Math.round(close * 100) / 100,
-            volume,
-        });
-        
-        currentPrice = close;
-    }
-    
-    return candles;
-}
-
 // Map frontend timeframe to Yahoo config (days back)
 const INTERVAL_MAP: Record<string, { interval: "1m" | "2m" | "5m" | "15m" | "30m" | "60m" | "90m" | "1h" | "1d" | "5d" | "1wk" | "1mo" | "3mo"; days: number }> = {
     '15m': { interval: '15m', days: 5 },
@@ -79,10 +34,10 @@ export async function GET(request: Request) {
         
         console.log('Fetching chart data:', { symbol, yahooSymbol, timeframe: tf, period1: period1Str, interval: config.interval });
         
-        // Retry logic for rate limiting
+        // Retry logic for rate limiting (reduced to 1 retry to minimize API calls)
         let result;
         let lastError;
-        const maxRetries = 3;
+        const maxRetries = 1;
         
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             try {
@@ -183,16 +138,7 @@ export async function GET(request: Request) {
             isRateLimit 
         });
         
-        // For rate limits or other errors, return mock data as fallback
-        // This ensures the chart still works during development/demo
-        if (isRateLimit) {
-            console.warn('Rate limited - using mock data as fallback');
-        } else {
-            console.warn('API error - using mock data as fallback');
-        }
-        
-        // Generate mock data as fallback
-        const mockData = generateMockData(symbol, config.interval, config.days);
-        return NextResponse.json(mockData, { status: 200 });
+        // Return empty array on error - no mock data
+        return NextResponse.json([], { status: 200 });
     }
 }

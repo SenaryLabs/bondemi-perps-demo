@@ -117,9 +117,10 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
         else setChartType('candles');
     }, [assetType]);
 
-    // FETCH HISTORY
+    // FETCH HISTORY with debouncing to reduce update frequency
     useEffect(() => {
-        async function fetchHistory() {
+        // Debounce: wait 500ms before fetching to avoid rapid refetches
+        const timeoutId = setTimeout(async () => {
             setIsLoading(true);
             try {
                 const url = `/api/history?symbol=${symbol}&timeframe=${timeframe}`;
@@ -137,18 +138,8 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
                     }
                     
                     console.warn(`History API returned ${res.status}:`, errorData);
-                    
-                    // If rate limited, the API now returns mock data, so just continue
-                    // The API will handle rate limits by returning mock data
-                    if (res.status === 429) {
-                        console.warn('Rate limited - API should return mock data');
-                        // Continue to process response (which should be mock data)
-                    } else {
-                        setHistoryData([]);
-                        return;
-                    }
-                    
                     setHistoryData([]);
+                    setIsLoading(false);
                     return;
                 }
                 
@@ -197,8 +188,9 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
             } finally {
                 setIsLoading(false);
             }
-        }
-        fetchHistory();
+        }, 1000); // Debounce: wait 1 second before fetching to reduce API calls
+
+        return () => clearTimeout(timeoutId); // Cleanup timeout on unmount or dependency change
     }, [symbol, timeframe, assetType]);
 
     // INIT CHART (only when container, chartType, assetType, or colors change)
