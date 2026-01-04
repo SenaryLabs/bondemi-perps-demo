@@ -122,15 +122,24 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
         async function fetchHistory() {
             setIsLoading(true);
             try {
-                const res = await fetch(`/api/history?symbol=${symbol}&timeframe=${timeframe}`);
+                const url = `/api/history?symbol=${symbol}&timeframe=${timeframe}`;
+                console.log('Fetching history:', { symbol, timeframe, url });
+                
+                const res = await fetch(url);
                 
                 if (!res.ok) {
-                    console.warn(`History API returned ${res.status}:`, await res.text().catch(() => ''));
+                    const errorText = await res.text().catch(() => '');
+                    console.warn(`History API returned ${res.status}:`, errorText);
                     setHistoryData([]);
                     return;
                 }
                 
                 const data = await res.json();
+                console.log('History API response:', { 
+                    isArray: Array.isArray(data), 
+                    length: Array.isArray(data) ? data.length : 0,
+                    firstItem: Array.isArray(data) && data.length > 0 ? data[0] : null
+                });
                 
                 if (data && Array.isArray(data)) {
                      let sorted = data.sort((a: any, b: any) => (a.time as number) - (b.time as number));
@@ -151,6 +160,13 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
                         d.open > 0 && d.high > 0 && d.low > 0 && d.close > 0
                      );
 
+                     console.log('Valid history data:', { 
+                         originalLength: sorted.length, 
+                         validLength: validData.length,
+                         firstValid: validData[0],
+                         lastValid: validData[validData.length - 1]
+                     });
+
                      setHistoryData(validData);
                 } else {
                     // Handle non-array responses gracefully
@@ -167,12 +183,11 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
         fetchHistory();
     }, [symbol, timeframe, assetType]);
 
-    // INIT CHART & UPDATE ON THEME CHANGE
+    // INIT CHART (only when container, chartType, assetType, or colors change)
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
         // Ensure we don't have a lingering chart from a previous mount that wasn't cleaned up (rare but possible in dev)
-        // Checks if element has children
         if (chartRef.current) {
             try {
                 chartRef.current.remove();
@@ -232,7 +247,6 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
         seriesRef.current = mainSeries;
 
         // VOLUME
-        // Simple heuristic: dim opacity of main colors or use neutral
         const volumeSeries = chart.addSeries(HistogramSeries, {
             priceFormat: { type: 'volume' },
             priceScaleId: '', // Overlay
@@ -241,26 +255,6 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
             scaleMargins: { top: 0.8, bottom: 0 },
         });
         volumeSeriesRef.current = volumeSeries;
-
-        // SET DATA
-        if (historyData.length > 0) {
-            const mappedData = historyData.map(d => {
-                if (chartType === 'area') {
-                    return { time: d.time, value: d.close };
-                }
-                return d;
-            });
-            mainSeries.setData(mappedData);
-            
-            const volumeData = historyData.map(d => ({
-                time: d.time,
-                value: d.volume,
-                color: d.close >= d.open ? colors.upColor + '40' : colors.downColor + '40', // 25% opacity
-            }));
-            volumeSeries.setData(volumeData);
-            
-            chart.timeScale().fitContent();
-        }
 
         // RESIZE HANDLER
         const handleResize = () => {
@@ -278,7 +272,42 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
             chart.remove();
             chartRef.current = null;
         };
-    }, [chartType, historyData, assetType, colors]); // Re-run when colors change
+    }, [chartType, assetType, colors]); // Only recreate chart when these change
+
+    // UPDATE CHART DATA when historyData changes
+    useEffect(() => {
+        if (!chartRef.current || !seriesRef.current || !volumeSeriesRef.current || historyData.length === 0) {
+            return;
+        }
+
+        console.log('Updating chart with data:', { dataLength: historyData.length });
+
+        const mappedData = historyData.map(d => {
+            if (chartType === 'area') {
+                return { time: d.time as number, value: d.close };
+            }
+            return {
+                time: d.time as number,
+                open: d.open,
+                high: d.high,
+                low: d.low,
+                close: d.close,
+            };
+        });
+        
+        seriesRef.current.setData(mappedData);
+        
+        const volumeData = historyData.map(d => ({
+            time: d.time as number,
+            value: d.volume || 0,
+            color: d.close >= d.open ? colors.upColor + '40' : colors.downColor + '40', // 25% opacity
+        }));
+        volumeSeriesRef.current.setData(volumeData);
+        
+        chartRef.current.timeScale().fitContent();
+        
+        console.log('Chart data updated successfully');
+    }, [historyData, chartType, colors]);
 
     return (
         <div className="flex flex-col h-full bg-card/10 relative group overflow-hidden">

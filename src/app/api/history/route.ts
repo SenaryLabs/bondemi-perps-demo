@@ -30,12 +30,24 @@ export async function GET(request: Request) {
 
     try {
         const yahooFinance = new YahooFinance();
+        const period1Str = period1.toISOString().split('T')[0];
+        
+        console.log('Fetching chart data:', { symbol, yahooSymbol, timeframe: tf, period1: period1Str, interval: config.interval });
+        
         const result = await yahooFinance.chart(yahooSymbol, {
-            period1: period1.toISOString().split('T')[0], // YYYY-MM-DD format
+            period1: period1Str, // YYYY-MM-DD format
             interval: config.interval,
         }) as { quotes?: Array<{ date: Date; open: number; high: number; low: number; close: number; volume?: number }> }; 
 
+        console.log('Chart API response:', { 
+            hasResult: !!result, 
+            hasQuotes: !!result?.quotes, 
+            quotesLength: result?.quotes?.length || 0,
+            firstQuote: result?.quotes?.[0] 
+        });
+
         if (!result || !result.quotes || result.quotes.length === 0) {
+            console.warn('No chart data returned for:', { symbol, yahooSymbol });
             // Return empty array instead of 404 to prevent client crashes
             return NextResponse.json([]); 
         }
@@ -54,8 +66,18 @@ export async function GET(request: Request) {
             // Fix Yields (Yahoo returns index * 10) - REMOVED as checked previously
             // if (['^TNX', '^FVX', '^TYX', '^IRX'].includes(yahooSymbol)) { ... }
 
+            // Handle date - it might be a Date object or a number
+            let timestamp: number;
+            if (q.date instanceof Date) {
+                timestamp = Math.floor(q.date.getTime() / 1000);
+            } else if (typeof q.date === 'number') {
+                timestamp = Math.floor(q.date / 1000);
+            } else {
+                timestamp = Math.floor(new Date(q.date as string).getTime() / 1000);
+            }
+
             return {
-                time: Math.floor(new Date(q.date).getTime() / 1000), // Unix timestamp
+                time: timestamp, // Unix timestamp
                 open,
                 high,
                 low,
@@ -63,6 +85,8 @@ export async function GET(request: Request) {
                 volume: Number(q.volume || 0), // Normalized key to 'volume'
             };
         }).filter((c): c is NonNullable<typeof c> => c !== null); // Remove nulls with type guard
+
+        console.log('Processed candles:', { count: candles.length, first: candles[0], last: candles[candles.length - 1] });
 
         return NextResponse.json(candles); // Return array directly to match Client expect matches
 
