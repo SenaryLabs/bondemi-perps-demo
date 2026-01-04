@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     period1.setDate(period1.getDate() - config.days);
 
     try {
-        const yahooFinance = new YahooFinance();
+        const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
         const period1Str = period1.toISOString().split('T')[0];
         
         console.log('Fetching chart data:', { symbol, yahooSymbol, timeframe: tf, period1: period1Str, interval: config.interval });

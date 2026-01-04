@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     const yahooSymbols = symbols.map(s => SYMBOL_MAP[s] || s);
 
     try {
-        const yahooFinance = new YahooFinance();
+        const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
         const results = await yahooFinance.quote(yahooSymbols) as Array<{ symbol: string; regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number }> | { symbol: string; regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number };
         
         // Normalize Response
