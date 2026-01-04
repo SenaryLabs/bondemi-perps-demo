@@ -21,15 +21,17 @@ export async function GET(request: Request) {
         const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
         
         // Retry logic for rate limiting
+        // Note: Yahoo Finance has strict rate limits (see: https://github.com/ghostfolio/ghostfolio/issues/6118)
+        // We use exponential backoff with longer waits to respect rate limits
         let results;
         let lastError;
-        const maxRetries = 1;
+        const maxRetries = 2; // Allow 2 retries (3 total attempts)
         
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
             try {
                 if (attempt > 0) {
-                    // Wait before retry
-                    const waitTime = 2000; // 2 seconds
+                    // Exponential backoff: 5s, 15s for retries
+                    const waitTime = attempt === 1 ? 5000 : 15000;
                     console.log(`Quote API retry attempt ${attempt}/${maxRetries} after ${waitTime}ms...`);
                     await new Promise(resolve => setTimeout(resolve, waitTime));
                 }
@@ -41,10 +43,14 @@ export async function GET(request: Request) {
             } catch (error: unknown) {
                 lastError = error;
                 const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                const isRateLimit = errorMessage.includes('Too Many Requests') || 
+                                   errorMessage.includes('429') || 
+                                   errorMessage.includes('rate limit') || 
+                                   errorMessage.includes('Failed to get crumb');
                 
                 // If it's a rate limit error and we have retries left, continue
-                if ((errorMessage.includes('Too Many Requests') || errorMessage.includes('429') || errorMessage.includes('rate limit') || errorMessage.includes('Failed to get crumb')) && attempt < maxRetries) {
-                    console.warn(`Rate limited, will retry... (attempt ${attempt + 1}/${maxRetries + 1})`);
+                if (isRateLimit && attempt < maxRetries) {
+                    console.warn(`Yahoo Finance rate limited (attempt ${attempt + 1}/${maxRetries + 1}). This is a known issue - see https://github.com/ghostfolio/ghostfolio/issues/6118`);
                     continue;
                 }
                 
@@ -100,7 +106,17 @@ export async function GET(request: Request) {
 
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('Yahoo Quote Error:', errorMessage, { symbols, yahooSymbols });
+        const isRateLimit = errorMessage.includes('Too Many Requests') || 
+                           errorMessage.includes('429') || 
+                           errorMessage.includes('rate limit') || 
+                           errorMessage.includes('Failed to get crumb');
+        
+        if (isRateLimit) {
+            console.error('Yahoo Finance rate limit exceeded. This is a known limitation - see https://github.com/ghostfolio/ghostfolio/issues/6118', { symbols, yahooSymbols });
+        } else {
+            console.error('Yahoo Quote Error:', errorMessage, { symbols, yahooSymbols });
+        }
+        
         // Return empty object on error to prevent client crashes
         // The client can handle empty data gracefully and will use cached/initial data
         return NextResponse.json({}, { status: 200 });
