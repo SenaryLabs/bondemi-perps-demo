@@ -17,7 +17,8 @@ export default function TradePage() {
     
     const asset = MARKET_CONFIG[selectedSymbol] || MARKET_CONFIG['XAU'];
 
-    // Market Data Hook using simulated mock feed
+    // Market Data Hook - fetch only the selected symbol to avoid duplicate calls
+    // The market selector will use this same data via props
     const { prices } = useMarketData([selectedSymbol]);
     const marketData = prices[selectedSymbol];
     const currentPrice = marketData?.price || 100;
@@ -38,6 +39,7 @@ export default function TradePage() {
                     <MarketSelector
                         selected={selectedSymbol}
                         onSelect={setSelectedSymbol}
+                        prices={prices}
                     />
                 </div>
 

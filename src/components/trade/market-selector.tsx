@@ -10,10 +10,12 @@ import { getMarketStatus } from '@/lib/market-hours';
 
 export function MarketSelector({ 
     selected, 
-    onSelect 
+    onSelect,
+    prices: externalPrices
 }: { 
     selected: string, 
-    onSelect: (id: string) => void 
+    onSelect: (id: string) => void,
+    prices?: Record<string, { symbol: string; price: number; change24h: number }>
 }) {
     // Only two main tabs for now per spec: RATES vs CRYPTO
     // We can group Commodities/FX into Rates or separate if user prefers.
@@ -25,8 +27,10 @@ export function MarketSelector({
     const [search, setSearch] = useState('');
 
     const allSymbols = Object.keys(MARKET_CONFIG);
-    // Only fetch the selected ticker price to avoid rate limiting - other symbols use static initial prices
-    const { prices, isLoading } = useMarketData([selected]);
+    // Use external prices if provided (from parent), otherwise fetch only selected ticker
+    // This avoids duplicate API calls when both parent and this component need the same data
+    const { prices: fetchedPrices, isLoading } = useMarketData(externalPrices ? [] : [selected]);
+    const prices = externalPrices || fetchedPrices;
     
     // Filter Logic
     const filteredMarkets = useMemo(() => {

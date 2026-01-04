@@ -29,8 +29,9 @@ export function useMarketData(symbols: string[] = []) {
     const symbolsKey = useMemo(() => symbols.join(','), [symbols]);
 
     useEffect(() => {
+        if (symbols.length === 0) return;
+        
         const fetchPrices = async () => {
-            if (symbols.length === 0) return;
             
             try {
                 const res = await fetch(`/api/quote?symbols=${symbolsKey}`);
@@ -75,7 +76,7 @@ export function useMarketData(symbols: string[] = []) {
         const interval = setInterval(fetchPrices, 60000); // Poll every 60s
 
         return () => clearInterval(interval);
-    }, [symbols, symbolsKey]); // Re-run if symbols change
+    }, [symbolsKey, symbols.length]); // Depend on symbolsKey and symbols.length to avoid unnecessary re-renders
 
     return {
         prices,
