@@ -19,29 +19,22 @@ export async function GET(request: Request) {
 
     try {
         const yahooFinance = new YahooFinance();
-        // @ts-ignore
-        const results = await yahooFinance.quote(yahooSymbols) as any[];
+        const results = await yahooFinance.quote(yahooSymbols) as Array<{ symbol: string; regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number }> | { symbol: string; regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number };
         
         // Normalize Response
-        const data: Record<string, any> = {};
+        const data: Record<string, { symbol: string; price: number; change24h: number }> = {};
 
         // Single result vs Array result handling
         const quotes = Array.isArray(results) ? results : [results];
-
-        quotes.forEach(q => {
-             // Reverse map to internal symbol (not perfect if 1-to-many, but works for us)
-             // We can use the requested symbol order if needed, but quote returns generic data.
-             // Better: Iterate requested symbols and find matching result via yahoo symbol.
-        });
 
         const mapped = symbols.reduce((acc, sym, idx) => {
             const ySym = yahooSymbols[idx];
             const q = quotes.find(item => item.symbol === ySym);
             
-            if (q) {
+            if (q && q.regularMarketPrice !== undefined) {
                 let price = q.regularMarketPrice;
-                let change = q.regularMarketChange;
-                let changePercent = q.regularMarketChangePercent;
+                let change = q.regularMarketChange ?? 0;
+                let changePercent = q.regularMarketChangePercent ?? 0;
 
                 // Fix Yields
                 // if (['^TNX', '^FVX', '^TYX', '^IRX'].includes(ySym)) {
@@ -64,12 +57,16 @@ export async function GET(request: Request) {
                 };
             }
             return acc;
-        }, {} as Record<string, any>);
+        }, {} as Record<string, { symbol: string; price: number; change24h: number }>);
 
+        // Return empty object if no data, but with 200 status to prevent client crashes
         return NextResponse.json(mapped);
 
-    } catch (error: any) {
-        console.error('Yahoo Quote Error:', error);
-        return NextResponse.json({ error: 'Failed to fetch quotes' }, { status: 500 });
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Yahoo Quote Error:', errorMessage, { symbols, yahooSymbols });
+        // Return empty object on error to prevent client crashes
+        // The client can handle empty data gracefully and will use cached/initial data
+        return NextResponse.json({}, { status: 200 });
     }
 }

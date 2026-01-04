@@ -33,27 +33,36 @@ export function useMarketData(symbols: string[] = []) {
             
             try {
                 const res = await fetch(`/api/quote?symbols=${symbols.join(',')}`);
-                if (!res.ok) throw new Error('Failed to fetch quote');
+                
+                if (!res.ok) {
+                    console.warn(`Quote API returned ${res.status}:`, await res.text().catch(() => ''));
+                    // Don't throw - just use existing cached data
+                    return;
+                }
                 
                 const data = await res.json();
                 
-                setPrices(current => {
-                    const next = { ...current };
-                    
-                    // Merge new data
-                    Object.keys(data).forEach(key => {
-                        if (data[key]) {
-                            next[key] = {
-                                ...next[key], // Keep existing props if any
-                                ...data[key]  // Overwrite with real data
-                            };
-                        }
+                // Only update if we got valid data
+                if (data && typeof data === 'object') {
+                    setPrices(current => {
+                        const next = { ...current };
+                        
+                        // Merge new data
+                        Object.keys(data).forEach(key => {
+                            if (data[key] && data[key].price !== undefined) {
+                                next[key] = {
+                                    ...next[key], // Keep existing props if any
+                                    ...data[key]  // Overwrite with real data
+                                };
+                            }
+                        });
+                        
+                        return next;
                     });
-                    
-                    return next;
-                });
+                }
             } catch (error) {
                 console.error('Market Data Polling Error:', error);
+                // Don't throw - just use existing cached data
             }
         };
         
