@@ -19,7 +19,43 @@ export async function GET(request: Request) {
 
     try {
         const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
-        const results = await yahooFinance.quote(yahooSymbols) as Array<{ symbol: string; regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number }> | { symbol: string; regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number };
+        
+        // Retry logic for rate limiting
+        let results;
+        let lastError;
+        const maxRetries = 1;
+        
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                if (attempt > 0) {
+                    // Wait before retry
+                    const waitTime = 2000; // 2 seconds
+                    console.log(`Quote API retry attempt ${attempt}/${maxRetries} after ${waitTime}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                }
+                
+                results = await yahooFinance.quote(yahooSymbols) as Array<{ symbol: string; regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number }> | { symbol: string; regularMarketPrice?: number; regularMarketChange?: number; regularMarketChangePercent?: number };
+                
+                // Success, break out of retry loop
+                break;
+            } catch (error: unknown) {
+                lastError = error;
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                
+                // If it's a rate limit error and we have retries left, continue
+                if ((errorMessage.includes('Too Many Requests') || errorMessage.includes('429') || errorMessage.includes('rate limit') || errorMessage.includes('Failed to get crumb')) && attempt < maxRetries) {
+                    console.warn(`Rate limited, will retry... (attempt ${attempt + 1}/${maxRetries + 1})`);
+                    continue;
+                }
+                
+                // For other errors or final attempt, throw
+                throw error;
+            }
+        }
+        
+        if (!results) {
+            throw lastError || new Error('Failed to fetch quotes after retries');
+        }
         
         // Normalize Response
         const data: Record<string, { symbol: string; price: number; change24h: number }> = {};

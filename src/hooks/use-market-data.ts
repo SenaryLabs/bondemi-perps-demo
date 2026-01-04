@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { AssetConfig } from '@/lib/market-config';
+import { useState, useEffect, useMemo } from 'react';
 
 // Define TickerData type as it's not exported from config
 type TickerData = {
@@ -9,8 +8,6 @@ type TickerData = {
     price: number;
     change24h: number;
 };
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function useMarketData(symbols: string[] = []) {
     // Initial static mock data (Deterministic for Hydration)
@@ -27,12 +24,15 @@ export function useMarketData(symbols: string[] = []) {
 
     const [prices, setPrices] = useState<Record<string, TickerData>>(initialPrices);
 
+    // Memoize symbols string to avoid unnecessary re-renders
+    const symbolsKey = useMemo(() => symbols.join(','), [symbols]);
+
     useEffect(() => {
         const fetchPrices = async () => {
             if (symbols.length === 0) return;
             
             try {
-                const res = await fetch(`/api/quote?symbols=${symbols.join(',')}`);
+                const res = await fetch(`/api/quote?symbols=${symbolsKey}`);
                 
                 if (!res.ok) {
                     console.warn(`Quote API returned ${res.status}:`, await res.text().catch(() => ''));
@@ -69,10 +69,12 @@ export function useMarketData(symbols: string[] = []) {
         // Initial Fetch
         fetchPrices();
 
-        const interval = setInterval(fetchPrices, 10000); // Poll every 10s (Yahoo rate limit safe)
+        // Poll every 60 seconds to avoid rate limiting (Yahoo Finance has strict rate limits)
+        // For real-time data, consider using a paid API service
+        const interval = setInterval(fetchPrices, 60000); // Poll every 60s
 
         return () => clearInterval(interval);
-    }, [symbols.join(',')]); // Re-run if symbols change
+    }, [symbols, symbolsKey]); // Re-run if symbols change
 
     return {
         prices,
