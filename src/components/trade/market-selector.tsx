@@ -24,7 +24,8 @@ export function MarketSelector({
     const [search, setSearch] = useState('');
 
     const allSymbols = Object.keys(MARKET_CONFIG);
-    const { prices, isLoading } = useMarketData(allSymbols);
+    // Only fetch BTC price to avoid rate limiting - other symbols use static initial prices
+    const { prices, isLoading } = useMarketData(['BTC']);
     
     // Filter Logic
     const filteredMarkets = useMemo(() => {
