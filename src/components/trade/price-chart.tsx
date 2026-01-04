@@ -123,7 +123,13 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
             setIsLoading(true);
             try {
                 const res = await fetch(`/api/history?symbol=${symbol}&timeframe=${timeframe}`);
-                if (!res.ok) throw new Error('Failed to fetch history');
+                
+                if (!res.ok) {
+                    console.warn(`History API returned ${res.status}:`, await res.text().catch(() => ''));
+                    setHistoryData([]);
+                    return;
+                }
+                
                 const data = await res.json();
                 
                 if (data && Array.isArray(data)) {
@@ -146,9 +152,14 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
                      );
 
                      setHistoryData(validData);
+                } else {
+                    // Handle non-array responses gracefully
+                    console.warn('History API returned non-array data:', data);
+                    setHistoryData([]);
                 }
             } catch (error) {
                 console.error("Chart History Error:", error);
+                setHistoryData([]); // Set empty array on error
             } finally {
                 setIsLoading(false);
             }
