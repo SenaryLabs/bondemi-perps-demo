@@ -129,7 +129,25 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
                 
                 if (!res.ok) {
                     const errorText = await res.text().catch(() => '');
-                    console.warn(`History API returned ${res.status}:`, errorText);
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch {
+                        errorData = { error: errorText };
+                    }
+                    
+                    console.warn(`History API returned ${res.status}:`, errorData);
+                    
+                    // If rate limited, the API now returns mock data, so just continue
+                    // The API will handle rate limits by returning mock data
+                    if (res.status === 429) {
+                        console.warn('Rate limited - API should return mock data');
+                        // Continue to process response (which should be mock data)
+                    } else {
+                        setHistoryData([]);
+                        return;
+                    }
+                    
                     setHistoryData([]);
                     return;
                 }
