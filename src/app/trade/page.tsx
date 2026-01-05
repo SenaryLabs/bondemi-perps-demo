@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { MarketSelector } from '@/components/trade/market-selector';
 import { OrderForm } from '@/components/trade/order-form';
 import { PriceChart } from '@/components/trade/price-chart';
 import { PositionsPanel } from '@/components/trade/positions-panel';
@@ -34,18 +33,9 @@ export default function TradePage() {
     return (
         <main className="flex flex-col h-full w-full bg-background text-foreground overflow-hidden">
             <div className="flex-1 flex overflow-hidden min-h-0 relative">
-                {/* Left: Market Selector (Fixed Width - Wider) */}
-                <div className="hidden md:block w-[300px] border-r border-border/30 bg-card/20 backdrop-blur-sm h-full overflow-y-auto flex-shrink-0">
-                    <MarketSelector
-                        selected={selectedSymbol}
-                        onSelect={setSelectedSymbol}
-                        prices={prices}
-                    />
-                </div>
-
-                {/* Center: Chart & Positions (Flexible) */}
+                {/* Center: Chart & Positions (Full Width) */}
                 <div className="flex-1 flex flex-col border-r border-border/30 relative h-full min-w-0">
-                     {/* Top Bar: Market Info & Stats (Moved here) */}
+                     {/* Top Bar: Market Info & Stats with Dropdown */}
                     <MarketInfoStrip
                         symbol={selectedSymbol}
                         price={currentPrice}
@@ -53,6 +43,8 @@ export default function TradePage() {
                         openInterest={fmtCompact(stats.openInterest)}
                         volume24h={fmtCompact(stats.volume)}
                         oracle="Pyth"
+                        onSymbolChange={setSelectedSymbol}
+                        prices={prices}
                     />
 
                     {/* Chart Area */}

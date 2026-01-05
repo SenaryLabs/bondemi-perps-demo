@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { TickerIcon } from './ticker-icon';
 import { MARKET_CONFIG } from '@/lib/market-config';
 import { getMarketStatus } from '@/lib/market-hours';
+import { MarketDropdown } from './market-dropdown';
 
 interface MarketInfoStripProps {
     symbol: string;
@@ -13,9 +14,11 @@ interface MarketInfoStripProps {
     openInterest: string;
     volume24h: string;
     oracle: string;
+    onSymbolChange?: (symbol: string) => void;
+    prices?: Record<string, { symbol: string; price: number; change24h: number }>;
 }
 
-export function MarketInfoStrip({ symbol, price, funding, openInterest, volume24h, oracle }: MarketInfoStripProps) {
+export function MarketInfoStrip({ symbol, price, funding, openInterest, volume24h, oracle, onSymbolChange, prices }: MarketInfoStripProps) {
     const fmtPrice = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtPercent = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
     
@@ -33,35 +36,71 @@ export function MarketInfoStrip({ symbol, price, funding, openInterest, volume24
 
     return (
         <div className="h-14 border-b border-border/30 flex items-center gap-6 px-4 bg-card/20 backdrop-blur-sm overflow-x-auto no-scrollbar">
-            {/* Market Selector */}
-            <button className="flex items-center gap-3 hover:bg-muted/20 px-2 py-1.5 rounded-lg transition-colors group shrink-0">
-                <TickerIcon symbol={symbol} size={32} />
-                <div className="flex flex-col items-start min-w-[100px]">
-                     <span className="text-base font-bold flex items-center gap-1 group-hover:text-primary transition-colors">
-                        {symbol}
-                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                     </span>
-                     {/* Market Status Badge */}
-                     <div className="flex items-center gap-1.5 mt-0.5">
-                        {asset?.type === 'crypto' ? (
-                            <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-amber-500/10">
-                                <Activity className="w-3 h-3 text-amber-400" />
-                                24/7 Market
+            {/* Market Selector Dropdown */}
+            {onSymbolChange ? (
+                <MarketDropdown
+                    selected={symbol}
+                    onSelect={onSymbolChange}
+                    prices={prices}
+                    trigger={
+                        <button className="flex items-center gap-3 hover:bg-muted/20 px-2 py-1.5 rounded-lg transition-colors group shrink-0">
+                            <TickerIcon symbol={symbol} size={32} />
+                            <div className="flex flex-col items-start min-w-[100px]">
+                                <span className="text-base font-bold flex items-center gap-1 group-hover:text-primary transition-colors">
+                                    {symbol}
+                                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                                </span>
+                                {/* Market Status Badge */}
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                    {asset?.type === 'crypto' ? (
+                                        <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-amber-500/10">
+                                            <Activity className="w-3 h-3 text-amber-400" />
+                                            24/7 Market
+                                        </div>
+                                    ) : (
+                                        <div className={cn(
+                                            "flex items-center gap-1.5 px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border transition-all shadow-sm",
+                                            status.isOpen 
+                                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-emerald-500/10" 
+                                                : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                        )}>
+                                            <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", status.isOpen ? "bg-emerald-400" : "bg-rose-400")} />
+                                            {status.isOpen ? "Market Open" : "Market Closed"}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        ) : (
-                            <div className={cn(
-                                "flex items-center gap-1.5 px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border transition-all shadow-sm",
-                                status.isOpen 
-                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-emerald-500/10" 
-                                    : "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                            )}>
-                                <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", status.isOpen ? "bg-emerald-400" : "bg-rose-400")} />
-                                {status.isOpen ? "Market Open" : "Market Closed"}
-                            </div>
-                        )}
-                     </div>
+                        </button>
+                    }
+                />
+            ) : (
+                <div className="flex items-center gap-3 px-2 py-1.5 shrink-0">
+                    <TickerIcon symbol={symbol} size={32} />
+                    <div className="flex flex-col items-start min-w-[100px]">
+                        <span className="text-base font-bold">
+                            {symbol}
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            {asset?.type === 'crypto' ? (
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-amber-500/10">
+                                    <Activity className="w-3 h-3 text-amber-400" />
+                                    24/7 Market
+                                </div>
+                            ) : (
+                                <div className={cn(
+                                    "flex items-center gap-1.5 px-2 py-1 rounded text-[9px] uppercase font-bold tracking-wider border transition-all shadow-sm",
+                                    status.isOpen 
+                                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-emerald-500/10" 
+                                        : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                )}>
+                                    <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", status.isOpen ? "bg-emerald-400" : "bg-rose-400")} />
+                                    {status.isOpen ? "Market Open" : "Market Closed"}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            </button>
+            )}
 
             <div className="h-8 w-px bg-border/30 shrink-0" />
 
