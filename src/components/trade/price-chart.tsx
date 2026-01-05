@@ -9,7 +9,8 @@ import {
     ISeriesApi, 
     CandlestickSeries, 
     AreaSeries, 
-    HistogramSeries 
+    HistogramSeries,
+    Time
 } from 'lightweight-charts';
 import { Settings, Maximize2, Camera, BarChart2, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -294,13 +295,13 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
 
         if (chartType === 'area') {
             const mappedData = historyData.map(d => ({
-                time: d.time as number,
+                time: d.time as Time,
                 value: d.close,
             }));
             (seriesRef.current as ISeriesApi<"Area">).setData(mappedData);
         } else {
             const mappedData = historyData.map(d => ({
-                time: d.time as number,
+                time: d.time as Time,
                 open: d.open,
                 high: d.high,
                 low: d.low,
@@ -310,7 +311,7 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
         }
         
         const volumeData = historyData.map(d => ({
-            time: d.time as number,
+            time: d.time as Time,
             value: d.volume || 0,
             color: d.close >= d.open ? colors.upColor + '40' : colors.downColor + '40', // 25% opacity
         }));
