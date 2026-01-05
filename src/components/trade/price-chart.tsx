@@ -292,20 +292,22 @@ export function PriceChart({ symbol, currentPrice, assetType = 'crypto' }: Price
 
         console.log('Updating chart with data:', { dataLength: historyData.length });
 
-        const mappedData = historyData.map(d => {
-            if (chartType === 'area') {
-                return { time: d.time as number, value: d.close };
-            }
-            return {
+        if (chartType === 'area') {
+            const mappedData = historyData.map(d => ({
+                time: d.time as number,
+                value: d.close,
+            }));
+            (seriesRef.current as ISeriesApi<"Area">).setData(mappedData);
+        } else {
+            const mappedData = historyData.map(d => ({
                 time: d.time as number,
                 open: d.open,
                 high: d.high,
                 low: d.low,
                 close: d.close,
-            };
-        });
-        
-        seriesRef.current.setData(mappedData);
+            }));
+            (seriesRef.current as ISeriesApi<"Candlestick">).setData(mappedData);
+        }
         
         const volumeData = historyData.map(d => ({
             time: d.time as number,
