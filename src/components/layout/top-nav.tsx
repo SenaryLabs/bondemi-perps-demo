@@ -24,15 +24,7 @@ export function TopNav() {
             {/* ... LHS ... */}
             <div className="flex items-center gap-8">
                 {/* ... Logo & Nav ... */}
-                 <div className="flex items-center gap-2.5 font-bold text-xl tracking-tight select-none">
-                  <div className={cn(
-                      "w-8 h-8 rounded flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20",
-                      theme === 'lime' 
-                        ? "bg-gradient-to-br from-primary to-[var(--emerald-500)]" 
-                        : "bg-primary"
-                  )}>B</div>
-                  Bondemi
-                </div>
+                  <img src="/bondemi.png" alt="Bondemi" className="h-8 w-auto" />
                 
                 {/* Main Nav - Hide on Landing Page */}
                 {pathname !== '/' && (
