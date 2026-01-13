@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, LayoutDashboard, Terminal, ShieldCheck } from 'lucide-react';
+import { ArrowRight, LayoutDashboard, Terminal, ShieldCheck, Link2, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HeroInterfaceMockup } from '@/components/landing/hero-interface-mockup';
 import { EmailAccessModal } from '@/components/landing/email-access-modal';
@@ -71,10 +71,22 @@ export default function LandingPage() {
                             <span>Pyth</span>
                          </div>
                          <div className="w-px h-3 bg-border" />
-                         {/* USDC */}
+                          {/* USDC */}
                          <div className="flex items-center gap-1.5 font-bold text-sm">
                             <div className="w-3 h-3 rounded-full border-2 border-primary" />
                             <span>USDC</span>
+                         </div>
+                         <div className="w-px h-3 bg-border" />
+                         {/* Chainlink */}
+                         <div className="flex items-center gap-1.5 font-bold text-sm">
+                            <Link2 size={14} className="text-blue-400 rotate-45" />
+                            <span>Chainlink</span>
+                         </div>
+                         <div className="w-px h-3 bg-border" />
+                         {/* Tron */}
+                         <div className="flex items-center gap-1.5 font-bold text-sm">
+                            <Zap size={14} className="text-red-500" />
+                            <span>Tron</span>
                          </div>
                     </div>
                 </div>
