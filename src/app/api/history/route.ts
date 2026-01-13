@@ -51,6 +51,7 @@ export async function GET(request: Request) {
                 result = await yahooFinance.chart(yahooSymbol, {
                     period1: period1Str, // YYYY-MM-DD format
                     interval: config.interval,
+                    includePrePost: false, // Ensure we don't get extended hours spikes
                 }) as { quotes?: Array<{ date: Date; open: number; high: number; low: number; close: number; volume?: number }> };
                 
                 // Success, break out of retry loop
@@ -90,7 +91,7 @@ export async function GET(request: Request) {
         }
 
         // Process Candles
-        const candles = result.quotes.map((q) => {
+        const rawCandles = result.quotes.map((q) => {
             const open = Number(q.open);
             const high = Number(q.high);
             const low = Number(q.low);
@@ -113,6 +114,17 @@ export async function GET(request: Request) {
                 timestamp = Math.floor(new Date(q.date as string).getTime() / 1000);
             }
 
+            // Outlier check: Remove candles with extreme wicks (>10% range in intraday)
+            // This is common in free APIs where bad data points appear as spikes to near-zero.
+            const range = high - low;
+            const avgPrice = (open + close) / 2;
+            const isStock = !symbol.includes('-USD') && !['XAU', 'XAG', 'WTI', 'BRENT'].includes(symbol);
+            
+            if (isStock && tf !== '1D' && range > avgPrice * 0.15) {
+                console.warn(`Filtering outlier candle for ${symbol}:`, { open, high, low, close, range: range.toFixed(2), price: avgPrice.toFixed(2) });
+                return null;
+            }
+
             return {
                 time: timestamp, // Unix timestamp
                 open,
@@ -123,7 +135,27 @@ export async function GET(request: Request) {
             };
         }).filter((c): c is NonNullable<typeof c> => c !== null); // Remove nulls with type guard
 
-        console.log('Processed candles:', { count: candles.length, first: candles[0], last: candles[candles.length - 1] });
+        // Aggregate 4H if needed (Yahoo doesn't provide 4H natively)
+        let candles = rawCandles;
+        if (tf === '4H') {
+            const aggregated = [];
+            for (let i = 0; i < rawCandles.length; i += 4) {
+                const chunk = rawCandles.slice(i, i + 4);
+                if (chunk.length === 0) continue;
+                
+                aggregated.push({
+                    time: chunk[0].time,
+                    open: chunk[0].open,
+                    high: Math.max(...chunk.map(c => c.high)),
+                    low: Math.min(...chunk.map(c => c.low)),
+                    close: chunk[chunk.length - 1].close,
+                    volume: chunk.reduce((sum, c) => sum + c.volume, 0),
+                });
+            }
+            candles = aggregated;
+        }
+
+        console.log('Processed candles:', { count: candles.length, type: tf });
 
         return NextResponse.json(candles); // Return array directly to match Client expect matches
 

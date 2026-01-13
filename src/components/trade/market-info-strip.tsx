@@ -15,7 +15,7 @@ interface MarketInfoStripProps {
     volume24h: string;
     oracle: string;
     onSymbolChange?: (symbol: string) => void;
-    prices?: Record<string, { symbol: string; price: number; change24h: number }>;
+    prices?: Record<string, { symbol: string; price: number; change24h: number; high24h?: number; low24h?: number }>;
 }
 
 export function MarketInfoStrip({ symbol, price, funding, openInterest, volume24h, oracle, onSymbolChange, prices }: MarketInfoStripProps) {
@@ -30,9 +30,25 @@ export function MarketInfoStrip({ symbol, price, funding, openInterest, volume24
     // Mock Data for extended stats
     const confidence = 0.001; 
     const nextFunding = "00:45:12";
-    const range24h = asset?.type === 'rates' 
-        ? `${(price * 0.99).toFixed(3)} - ${(price * 1.01).toFixed(3)}`
-        : `${(price * 0.95).toLocaleString()} - ${(price * 1.05).toLocaleString()}`;
+    
+    const currentPriceData = prices?.[symbol];
+    const high24h = currentPriceData?.high24h;
+    const low24h = currentPriceData?.low24h;
+    
+    let range24h = "";
+    
+    if (high24h !== undefined && low24h !== undefined) {
+      if (asset?.type === 'rates') {
+        range24h = `${low24h.toFixed(3)} - ${high24h.toFixed(3)}`;
+      } else {
+         range24h = `${low24h.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - ${high24h.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+    } else {
+        // Fallback Mock Logic
+        range24h = asset?.type === 'rates' 
+          ? `${(price * 0.99).toFixed(3)} - ${(price * 1.01).toFixed(3)}`
+          : `${(price * 0.95).toLocaleString()} - ${(price * 1.05).toLocaleString()}`;
+    }
 
     return (
         <div className="h-14 border-b border-border/30 flex items-center gap-6 px-4 bg-card/20 backdrop-blur-sm overflow-x-auto no-scrollbar">

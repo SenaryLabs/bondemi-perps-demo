@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bondemi | Platform Markets & Data Sources</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #020617;
+            --card: #0f172a;
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #3b82f6;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .controls {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            background: #1e293b;
+            border: 1px solid var(--border);
+            padding: 12px 16px 12px 40px;
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .stats-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .table-container {
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255,255,255,0.02);
+            padding: 16px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.01);
+        }
+
+        .asset-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-placeholder {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .symbol-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: white;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .type-crypto { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .type-stock { background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+        .type-fx { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        .type-commodity { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .type-rates { background: rgba(244, 63, 94, 0.1); color: #fb7185; }
+
+        .source-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            background: #1e293b;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .pyth-active {
+            color: #e879f9;
+            border-color: rgba(232, 121, 249, 0.2);
+            background: rgba(232, 121, 249, 0.05);
+        }
+
+        .yahoo-active {
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .description-cell {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            max-width: 300px;
+        }
+
+        footer {
+            margin-top: 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .description-cell, th:nth-child(2), td:nth-child(2) {
+                display: none;
+            }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bondemi Markets</h1>
+            <p class="subtitle">Real-time data transparency and infrastructure documentation for all supported assets.</p>
+        </header>
+
+        <div class="controls">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search by ticker, company name, or asset type...">
+            </div>
+            <div class="stats-badge" id="tickerCount">106 Tickers Active</div>
+        </div>
+
+        <div class="table-container">
+            <table id="marketsTable">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Status / Name</th>
+                        <th>Type</th>
+                        <th>Price Feed</th>
+                        <th>Stats Source</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be injected here -->
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            &copy; 2026 Bondemi Protocol • Powered by Pyth Hermes V2 & Yahoo Finance
+        </footer>
+    </div>
+
+    <script>
+        const markets = [
+            // RATES
+            { s: 'US10Y', n: 'US 10Y Yield', d: '10-Year Treasury Note Yield', t: 'rates', p: 'Yahoo Finance' },
+            { s: 'US02Y', n: 'US 2Y Yield', d: '2-Year Treasury Note Yield', t: 'rates', p: 'Yahoo Finance' },
+            { s: 'HYG', n: 'High Yield Corp', d: 'iShares iBoxx High Yield Corp Bond ETF', t: 'rates', p: 'Yahoo Finance' },
+            
+            // CRYPTO
+            { s: 'BTC', n: 'Bitcoin', d: 'Digital Gold', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'ETH', n: 'Ethereum', d: 'Smart Contract Platform', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'SOL', n: 'Solana', d: 'High Performance Chain', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'BNB', n: 'Binance Coin', d: 'Exchange Utility Token', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'XRP', n: 'Ripple', d: 'Digital Payment Network', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'ADA', n: 'Cardano', d: 'PoS Blockchain', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'TRX', n: 'TRON', d: 'Entertainment Content System', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'LINK', n: 'Chainlink', d: 'Oracle Network', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'HYPE', n: 'Hyperliquid', d: 'L1 for Perps', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'ONDO', n: 'Ondo Finance', d: 'RWA Yield', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'AERO', n: 'Aerodrome', d: 'Base DEX', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'DOGE', n: 'Dogecoin', d: 'Original Meme Coin', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'BONK', n: 'Bonk', d: 'Solana Meme Coin', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'AAVE', n: 'Aave', d: 'Lending Protocol', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'AVAX', n: 'Avalanche', d: 'Smart Contract Platform', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'ENA', n: 'Ethena', d: 'Synthetic Dollar Protocol', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'PEPE', n: 'Pepe', d: 'Frog Meme Coin', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'LDO', n: 'Lido', d: 'Liquid Staking', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'TIA', n: 'Celestia', d: 'Modular DA', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'RENDER', n: 'Render', d: 'Decentralized GPU Rendering', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'ICP', n: 'Internet Computer', d: 'World Computer', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'INJ', n: 'Injective', d: 'Finance-focused L1', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'JASMY', n: 'Jasmy', d: 'Data Democracy', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'ALGO', n: 'Algorand', d: 'Pure PoS', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'CRO', n: 'Cronos', d: 'Crypto.com Chain', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'QNT', n: 'Quant', d: 'Interoperability Protocol', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'CAKE', n: 'PancakeSwap', d: 'DEX Utility', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'SHIB', n: 'Shiba Inu', d: 'Community Ecosystem', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'JUP', n: 'Jupiter', d: 'Solana Aggregator', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'PYTH', n: 'Pyth Network', d: 'Oracle Protocol', t: 'crypto', p: 'Pyth Hermes' },
+            { s: 'DRIFT', n: 'Drift', d: 'Solana Perps DEX', t: 'crypto', p: 'Yahoo Finance' },
+            { s: 'VIRTUALS', n: 'Virtuals', d: 'AI Agent Layer', t: 'crypto', p: 'Yahoo Finance' },
+            { s: 'PENGU', n: 'Pudgy Penguins', d: 'NFT Ecosystem', t: 'crypto', p: 'Yahoo Finance' },
+            { s: 'POL', n: 'Polygon', d: 'Ethereum Scaling', t: 'crypto', p: 'Yahoo Finance' },
+            { s: 'KAS', n: 'Kaspa', d: 'BlockDAG Protocol', t: 'crypto', p: 'Yahoo Finance' },
+            { s: 'TRUMP', n: 'Trump Coin', d: 'PolitiFi Meme', t: 'crypto', p: 'Yahoo Finance' },
+
+            // COMMODITIES
+            { s: 'XAU', n: 'Gold', d: 'Gold Spot/Futures', t: 'commodity', p: 'Pyth Hermes' },
+            { s: 'XAG', n: 'Silver', d: 'Silver Spot/Futures', t: 'commodity', p: 'Pyth Hermes' },
+            { s: 'WTI', n: 'Crude Oil', d: 'WTI Crude Oil Futures', t: 'commodity', p: 'Pyth Hermes' },
+            { s: 'BRENT', n: 'Brent Crude', d: 'Brent Crude Oil Futures', t: 'commodity', p: 'Pyth Hermes' },
+            { s: 'NG', n: 'Natural Gas', d: 'Natural Gas Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'ZC', n: 'Corn', d: 'Corn Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'ZW', n: 'Wheat', d: 'Wheat Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'HG', n: 'Copper', d: 'Copper Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'ZW-SOY', n: 'Soybeans', d: 'Soybean Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'KC', n: 'Coffee', d: 'Coffee Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'SB', n: 'Sugar', d: 'Sugar Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'CT', n: 'Cotton', d: 'Cotton Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'RBOB', n: 'Gasoline', d: 'RBOB Gasoline Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'HO', n: 'Heating Oil', d: 'Heating Oil Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'AL', n: 'Aluminium', d: 'Aluminium Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'ZN', n: 'Zinc', d: 'Zinc Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'NI', n: 'Nickel', d: 'Nickel Futures', t: 'commodity', p: 'Yahoo Finance' },
+            { s: 'COCOA', n: 'Cocoa', d: 'Cocoa Futures', t: 'commodity', p: 'Yahoo Finance' },
+
+            // STOCKS
+            { s: 'NVDA', n: 'NVIDIA', d: 'AI Computing', t: 'stock', p: 'Pyth Hermes' },
+            { s: 'TSLA', n: 'Tesla', d: 'Electric Vehicles', t: 'stock', p: 'Pyth Hermes' },
+            { s: 'AAPL', n: 'Apple', d: 'Consumer Electronics', t: 'stock', p: 'Pyth Hermes' },
+            { s: 'MSFT', n: 'Microsoft', d: 'Software & Cloud', t: 'stock', p: 'Pyth Hermes' },
+            { s: 'AMZN', n: 'Amazon', d: 'E-commerce & Cloud', t: 'stock', p: 'Pyth Hermes' },
+            { s: 'GOOGL', n: 'Alphabet', d: 'Google search & AI', t: 'stock', p: 'Pyth Hermes' },
+            { s: 'META', n: 'Meta', d: 'Social Media & Metaverse', t: 'stock', p: 'Pyth Hermes' },
+            { s: 'SPY', n: 'S&P 500 ETF', d: 'SPDR S&P 500 ETF Trust', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'QQQ', n: 'Nasdaq 100 ETF', d: 'Invesco QQQ Trust', t: 'stock', p: 'Yahoo Finance' },
+
+            // EUROPE / INT
+            { s: 'BABA', n: 'Alibaba', d: 'China E-commerce giant', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'TCEHY', n: 'Tencent', d: 'China Social Media & Gaming', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'ASML', n: 'ASML', d: 'Semiconductor Lithography', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'LVMH', n: 'LVMH', d: 'Luxury Goods', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'SAP', n: 'SAP', d: 'Enterprise Software', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'NVO', n: 'Novo Nordisk', d: 'Pharmaceuticals', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'OR.PA', n: "L'Oreal", d: 'Consumer Goods', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'SIE.DE', n: 'Siemens', d: 'Industrial Powerhouse', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'AZN', n: 'AstraZeneca', d: 'Pharmaceuticals', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'TTE.PA', n: 'TotalEnergies', d: 'Energy giant', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'RACE', n: 'Ferrari', d: 'Luxury Automotive', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'P911.DE', n: 'Porsche', d: 'Automotive', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'HSBC', n: 'HSBC', d: 'Banking & Finance', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'BARC.L', n: 'Barclays', d: 'Banking', t: 'stock', p: 'Yahoo Finance' },
+            { s: '601288.SS', n: 'Agri Bank of China', d: 'China State Bank', t: 'stock', p: 'Yahoo Finance' },
+            { s: '1398.HK', n: 'ICBC', d: 'China State Bank', t: 'stock', p: 'Yahoo Finance' },
+            { s: '300750.SZ', n: 'CATL', d: 'Battery Manufacturing', t: 'stock', p: 'Yahoo Finance' },
+            { s: '0941.HK', n: 'China Mobile', d: 'Telecommunications', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'TM', n: 'Toyota', d: 'Automotive giant', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'BP', n: 'BP', d: 'Energy & Petrochemicals', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'SHEL', n: 'Shell', d: 'Oil & Gas giant', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'SSNLF', n: 'Samsung', d: 'Electronics & Tech', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'RELIANCE', n: 'Reliance', d: 'India Conglomerate', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'ARAMCO', n: 'Saudi Aramco', d: 'Oil powerhouse', t: 'stock', p: 'Yahoo Finance' },
+
+            // FX
+            { s: 'EUR', n: 'Euro', d: 'EUR/USD', t: 'fx', p: 'Yahoo Finance' },
+            { s: 'JPY', n: 'Yen', d: 'USD/JPY', t: 'fx', p: 'Yahoo Finance' },
+            { s: 'GBP', n: 'British Pound', d: 'GBP/USD', t: 'fx', p: 'Pyth Hermes' },
+            { s: 'AUD', n: 'Australian Dollar', d: 'AUD/USD', t: 'fx', p: 'Pyth Hermes' },
+            { s: 'CAD', n: 'Canadian Dollar', d: 'USD/CAD', t: 'fx', p: 'Pyth Hermes' },
+            { s: 'CHF', n: 'Swiss Franc', d: 'USD/CHF', t: 'fx', p: 'Pyth Hermes' },
+            { s: 'NZD', n: 'NZ Dollar', d: 'NZD/USD', t: 'fx', p: 'Pyth Hermes' },
+            { s: 'TRY', n: 'Lira', d: 'USD/TRY', t: 'fx', p: 'Pyth Hermes' },
+            { s: 'BRL', n: 'Real', d: 'USD/BRL', t: 'fx', p: 'Yahoo Finance' },
+            { s: 'MXN', n: 'Peso', d: 'USD/MXN', t: 'fx', p: 'Yahoo Finance' },
+            { s: 'INR', n: 'Rupee', d: 'USD/INR', t: 'fx', p: 'Yahoo Finance' },
+
+            // INDICES
+            { s: 'SPX', n: 'S&P 500', d: 'S&P 500 Index', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'NDX', n: 'Nasdaq 100', d: 'Nasdaq 100 Index', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'DJI', n: 'Dow Jones', d: 'Dow Jones Industrial Average', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'DAX', n: 'DAX', d: 'German DAX Index', t: 'stock', p: 'Yahoo Finance' },
+            { s: 'HSI', n: 'Hang Seng', d: 'Hang Seng Index', t: 'stock', p: 'Yahoo Finance' },
+        ];
+
+        const tableBody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('searchInput');
+        const tickerCount = document.getElementById('tickerCount');
+
+        function renderTable(data) {
+            tableBody.innerHTML = '';
+            data.forEach(m => {
+                const tr = document.createElement('tr');
+                const isPyth = m.p === 'Pyth Hermes';
+                
+                tr.innerHTML = `
+                    <td>
+                        <div class="asset-cell">
+                            <div class="icon-placeholder">${m.s.substring(0,2)}</div>
+                            <span class="symbol-tag">${m.s}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${m.n}</div>
+                        <div class="description-cell">${m.d}</div>
+                    </td>
+                    <td>
+                        <span class="type-badge type-${m.t}">${m.t}</span>
+                    </td>
+                    <td>
+                        <span class="source-tag ${isPyth ? 'pyth-active' : 'yahoo-active'}">${m.p}</span>
+                    </td>
+                    <td>
+                        <span class="source-tag yahoo-active">Yahoo Finance</span>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            tickerCount.textContent = `${data.length} Tickers Active`;
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = markets.filter(m => 
+                m.s.toLowerCase().includes(query) || 
+                m.n.toLowerCase().includes(query) || 
+                m.t.toLowerCase().includes(query) ||
+                m.d.toLowerCase().includes(query)
+            );
+            renderTable(filtered);
+        });
+
+        // Initial render
+        renderTable(markets);
+    </script>
+</body>
+</html>

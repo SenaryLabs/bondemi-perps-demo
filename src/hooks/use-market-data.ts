@@ -8,19 +8,21 @@ type TickerData = {
     symbol: string;
     price: number;
     change24h: number;
+    high24h?: number;
+    low24h?: number;
 };
 
 // Initial static mock data (Deterministic for Hydration)
 const initialPrices: Record<string, TickerData> = {
-    'US10Y': { symbol: 'US10Y', price: 4.25, change24h: 0.85 }, 
-    'US02Y': { symbol: 'US02Y', price: 4.15, change24h: 0.42 },
-    'HYG':   { symbol: 'HYG',   price: 7.75,  change24h: 0.05 },
-    'BTC':   { symbol: 'BTC',   price: 92450,   change24h: 3.2 },
-    'ETH':   { symbol: 'ETH',   price: 3850,      change24h: 1.5 },
-    'SOL':   { symbol: 'SOL',   price: 245,        change24h: 4.8 },
-    'XAU':   { symbol: 'XAU',   price: 2650.50,    change24h: 0.85 },
-    'NVDA':  { symbol: 'NVDA',  price: 135.50,     change24h: 2.1 },
-    'TSLA':  { symbol: 'TSLA',  price: 345.20,     change24h: -1.2 },
+    'US10Y': { symbol: 'US10Y', price: 4.25, change24h: 0.85, high24h: 4.30, low24h: 4.20 }, 
+    'US02Y': { symbol: 'US02Y', price: 4.15, change24h: 0.42, high24h: 4.20, low24h: 4.10 },
+    'HYG':   { symbol: 'HYG',   price: 7.75,  change24h: 0.05, high24h: 7.80, low24h: 7.70 },
+    'BTC':   { symbol: 'BTC',   price: 92450,   change24h: 3.2, high24h: 95000, low24h: 90000 },
+    'ETH':   { symbol: 'ETH',   price: 3850,      change24h: 1.5, high24h: 3950, low24h: 3750 },
+    'SOL':   { symbol: 'SOL',   price: 245,        change24h: 4.8, high24h: 255, low24h: 235 },
+    'XAU':   { symbol: 'XAU',   price: 2650.50,    change24h: 0.85, high24h: 2680, low24h: 2630 },
+    'NVDA':  { symbol: 'NVDA',  price: 135.50,     change24h: 2.1, high24h: 138, low24h: 132 },
+    'TSLA':  { symbol: 'TSLA',  price: 345.20,     change24h: -1.2, high24h: 350, low24h: 340 },
 };
 
 // Global state to track if initial fetch has been done
@@ -123,9 +125,9 @@ export function useMarketData(symbols: string[] = []) {
         const timeoutId = setTimeout(() => {
             fetchSelectedPrices();
             
-            // Poll every 60 seconds to avoid rate limiting
-            intervalId = setInterval(fetchSelectedPrices, 60000);
-        }, 2000); // Wait 2 seconds after initial fetch
+            // Poll every 5 seconds for real-time feel (Pyth Hermes is low latency)
+            intervalId = setInterval(fetchSelectedPrices, 5000);
+        }, 1000); // Wait 1 second after initial fetch
 
         return () => {
             clearTimeout(timeoutId);
